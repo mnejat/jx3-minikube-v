@@ -1,0 +1,68 @@
+apiVersion: v1
+data:
+  config.yaml: |
+    branch-protection:
+      orgs:
+        mnejat:
+          repos:
+            jx3-minikube-v:
+              required_status_checks:
+                contexts:
+                - promotion-build
+      protect-tested-repos: true
+    github:
+      LinkURL: null
+    plank: {}
+    pod_namespace: jx
+    postsubmits:
+      mnejat/jx3-minikube-v:
+      - agent: tekton
+        branches:
+        - master
+        name: promotion
+        skip_report: true
+    presubmits:
+      mnejat/jx3-minikube-v:
+      - agent: tekton
+        always_run: true
+        context: promotion-build
+        name: promotion-build
+        rerun_command: /test this
+        trigger: (?m)^/test( all| this),?(\s+|$)
+    prowjob_namespace: jx
+    push_gateway:
+      serve_metrics: false
+    tide:
+      context_options:
+        from-branch-protection: true
+        required-if-present-contexts: []
+        skip-unknown-contexts: false
+      merge_method:
+        mnejat/jx3-minikube-v: merge
+      queries:
+      - labels:
+        - approved
+        missingLabels:
+        - do-not-merge
+        - do-not-merge/hold
+        - do-not-merge/work-in-progress
+        - needs-ok-to-test
+        - needs-rebase
+        repos:
+        - mnejat/jx3-minikube-v
+      - labels:
+        - updatebot
+        missingLabels:
+        - do-not-merge
+        - do-not-merge/hold
+        - do-not-merge/work-in-progress
+        - needs-ok-to-test
+        - needs-rebase
+        repos:
+        - mnejat/jx3-minikube-v
+      target_url: http://deck-jx.192.168.64.2.nip.io
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: config
+  namespace: jx
